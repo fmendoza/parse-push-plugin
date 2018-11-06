@@ -29,6 +29,7 @@ public class ParsePushPlugin extends CordovaPlugin {
   private static final String ACTION_REGISTER_CALLBACK = "registerCallback";
   private static final String ACTION_REGISTER_FOR_PN = "register";
   public static final String ACTION_RESET_BADGE = "resetBadge";
+  public static final String ACTION_SET_BADGE = "setBadge";
 
   private static CallbackContext gEventCallback = null;
   private static Queue<PluginResult> pnQueue = new LinkedList();
@@ -73,6 +74,10 @@ public class ParsePushPlugin extends CordovaPlugin {
     }
     if (action.equals(ACTION_RESET_BADGE)) {
       ParsePushPluginReceiver.resetBadge(this.cordova.getActivity().getApplicationContext());
+      return true;
+    }
+    if (action.equals(ACTION_SET_BADGE)) {
+      ParsePushPluginReceiver.setBadge(args.getInt(0), this.cordova.getActivity().getApplicationContext());
       return true;
     }
     if (action.equals(ACTION_REGISTER_FOR_PN)) {
