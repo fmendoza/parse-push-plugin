@@ -97,6 +97,18 @@
      [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)setBadge:(CDVInvokedUrlCommand *)command {
+     CDVPluginResult* pluginResult = nil;
+     PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+    
+     NSInteger count = [command.arguments objectAtIndex:0];
+    
+     currentInstallation.badge = count;
+
+     [currentInstallation saveInBackground];
+     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 
 - (void)registerForPN {
     //
