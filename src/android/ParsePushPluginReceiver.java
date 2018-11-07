@@ -31,6 +31,8 @@ import android.content.SharedPreferences;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
+import com.parse.ParseInstallation;
+
 public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
   public static final String LOGTAG = "ParsePushPluginReceiver";
   public static final String RESOURCE_PUSH_ICON_COLOR = "parse_push_icon_color";
@@ -283,11 +285,19 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
 
     saveBadge(badge, ctx);
     ShortcutBadger.applyCount(ctx, badge);
+    
+    ParseInstallation currentInstallation = ParseInstallation.getCurrentInstallation();
+    currentInstallation.put("badge", badge);
+    currentInstallation.saveInBackground();
   }
 
   public static void resetBadge(Context ctx) {
     saveBadge(0, ctx);
     ShortcutBadger.removeCount(ctx);
+    
+    ParseInstallation currentInstallation = ParseInstallation.getCurrentInstallation();
+    currentInstallation.put("badge", 0);
+    currentInstallation.saveInBackground();
   }
 
   private static void saveBadge(int badge, Context ctx) {
