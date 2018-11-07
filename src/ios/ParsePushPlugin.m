@@ -101,7 +101,7 @@
      CDVPluginResult* pluginResult = nil;
      PFInstallation *currentInstallation = [PFInstallation currentInstallation];
     
-     NSInteger count = [command.arguments objectAtIndex:0];
+     int count = (int)[(NSNumber *)[command.arguments objectAtIndex:0] integerValue];
     
      currentInstallation.badge = count;
 
