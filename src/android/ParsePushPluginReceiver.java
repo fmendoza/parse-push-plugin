@@ -185,6 +185,7 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
 
     if (pnData.has("alert")) {
       builder.setContentText(pnData.optString("alert"));
+      builder.setStyle(new NotificationCompat.BigTextStyle().bigText(pnData.optString("alert")));
     }
 
     if (!ParsePushPlugin.isInForeground()) {
