@@ -90,7 +90,7 @@
       <framework src="libz.tbd" />
       <framework src="libsqlite3.tbd" />
       <framework src="src/ios/Frameworks/Parse.framework" custom="true" />
-      <framework src="src/ios/Frameworks/Bolts.framework" custom="true" />
+      <framework src="src/ios/Frameworks/Bolts.framework" type="podspec" spec="~> 1.8.4" />
    </platform>
 
    <platform name="windows">
