@@ -2,16 +2,20 @@ package github.taivo.parsepushplugin;
 
 import android.app.Application;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.parse.FunctionCallback;
 import com.parse.Parse;
-import com.parse.Parse.Configuration.Builder;
+import com.parse.ParseCloud;
 import com.parse.ParseInstallation;
 import com.parse.SaveCallback;
 import com.parse.ParseException;
 
-import github.taivo.parsepushplugin.ParsePushConfigReader;
-import github.taivo.parsepushplugin.ParsePushConfigException;
-
+import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /*
    Why is this Application subclass needed?
