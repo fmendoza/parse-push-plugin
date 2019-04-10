@@ -82,7 +82,7 @@ public class ParsePushApplication extends Application {
           if (ex == null) {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
               if (ParseInstallation.getCurrentInstallation().get("deviceToken") == null) {
-                logDeviceToken(config.getParseGcmSenderId());
+                logDeviceToken(config.getGcmSenderId());
               }
             }
         }
@@ -112,10 +112,10 @@ public class ParsePushApplication extends Application {
   private void setDeviceTokenOnInstallation(String token) {
 
     HashMap<String, Object> params = new HashMap<>();
-    params.put("insId", ParseInstallation.getCurrentInstallation().getObjectId());
-    params.put("devToken", token);
-    ParseCloud.callFunctionInBackground("your_device_token_cloud_function", params, new FunctionCallback<String>() {
-      public void done(final String success,ParseException e) {
+    params.put("id", ParseInstallation.getCurrentInstallation().getObjectId());
+    params.put("token", token);
+    ParseCloud.callFunctionInBackground("saveDeviceToken", params, new FunctionCallback<ParseInstallation>() {
+      public void done(final ParseInstallation success, ParseException e) {
         if (e == null) {
           Log.v("1020", "SETTING DEVICE TOKEN OK");
         }
