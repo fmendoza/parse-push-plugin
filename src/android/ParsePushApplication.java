@@ -79,11 +79,13 @@ public class ParsePushApplication extends Application {
       ParseInstallation.getCurrentInstallation().saveInBackground(new SaveCallback() {
         @Override
         public void done(ParseException ex) {
-          if (null != ex) {
-            Log.e(LOGTAG, ex.toString());
-          } else {
-            Log.d(LOGTAG, "Installation saved");
-          }
+          if (ex == null) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
+              if (ParseInstallation.getCurrentInstallation().get("deviceToken") == null) {
+                logDeviceToken(config.getParseGcmSenderId());
+              }
+            }
+        }
         }
       });
 
@@ -91,4 +93,34 @@ public class ParsePushApplication extends Application {
       Log.e(LOGTAG, ex.toString());
     }
   }
+
+  private void logDeviceToken(String senderId) {
+    AsyncTask.execute(new Runnable() {
+      @Override
+      public void run() {
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+        try {
+          String token = gcm.register(senderId);
+          setDeviceTokenOnInstallation(token);
+        } catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+  }
+
+  private void setDeviceTokenOnInstallation(String token) {
+
+    HashMap<String, Object> params = new HashMap<>();
+    params.put("insId", ParseInstallation.getCurrentInstallation().getObjectId());
+    params.put("devToken", token);
+    ParseCloud.callFunctionInBackground("your_device_token_cloud_function", params, new FunctionCallback<String>() {
+      public void done(final String success,ParseException e) {
+        if (e == null) {
+          Log.v("1020", "SETTING DEVICE TOKEN OK");
+        }
+      }
+    });
+  }
+
 }
