@@ -1,7 +1,6 @@
 package github.taivo.parsepushplugin;
 
 import com.parse.ParsePushBroadcastReceiver;
-import com.parse.ParseAnalytics;
 
 import android.app.Activity;
 import android.content.Context;
@@ -67,14 +66,14 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
       }
       else {
         // check if this is a silent notification
-        Notification notification = getNotification(context, intent);
+        //Notification notification = getNotification(context, intent);
 
-        if (notification != null) {
+        //if (notification != null) {
           // use tag + notification id=0 to limit the number of notifications in the tray
           // (older messages with the same tag and notification id will be replaced)
           NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-          notifManager.notify(getNotificationTag(context, intent), 0, notification);
-        }
+          notifManager.notify(getNotificationTag(context, intent), 0, getNotification(context, intent).build());
+        //}
 
         //
         // A user with Android 5.0.1 reports that notif is not created in tray when
@@ -99,7 +98,7 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
 
     activityIntent.putExtras(intent).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-    ParseAnalytics.trackAppOpened(intent);
+    //ParseAnalytics.trackAppOpened(intent);
 
     // allow a urlHash parameter for hash as well as query params.
     // This lets the app know what to do at coldstart by opening a PN.
@@ -118,7 +117,7 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
   }
 
   @Override
-  protected Notification getNotification(Context context, Intent intent) {
+  protected NotificationCompat.Builder getNotification(Context context, Intent intent) {
     //
     // Build a notification entry for the tray
     //
@@ -221,13 +220,13 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
     }
 
     if (!isSilent) {
-      return builder.build();
+      return builder;
     }
 
     return null;
   }
 
-  private static JSONObject getPushData(Intent intent) {
+  protected JSONObject getPushData(Intent intent) {
     JSONObject pnData = null;
     try {
       pnData = new JSONObject(intent.getStringExtra(KEY_PUSH_DATA));
@@ -243,7 +242,7 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
     return (String) appName;
   }
 
-  private static String getNotificationTag(Context context, Intent intent) {
+  protected String getNotificationTag(Context context, Intent intent) {
     return getPushData(intent).optString("title", getAppName(context));
   }
 

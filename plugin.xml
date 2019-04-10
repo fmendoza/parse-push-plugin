@@ -48,7 +48,8 @@
          <permission android:protectionLevel="signature" android:name="${applicationId}.permission.C2D_MESSAGE" />
          <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
       </config-file>
-
+      
+      <framework src="com.google.firebase:firebase-core:16.0.3" />
       <framework src="com.github.parse-community.Parse-SDK-Android:parse:1.18.6" />
       <framework src="com.github.parse-community.Parse-SDK-Android:fcm:1.18.6" />
       <framework src="com.android.support:support-v4:+" />
