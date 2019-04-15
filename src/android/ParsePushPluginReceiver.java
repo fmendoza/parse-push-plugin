@@ -33,6 +33,10 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 
 import com.parse.ParseInstallation;
 
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.net.Uri;
+
 public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
   public static final String LOGTAG = "ParsePushPluginReceiver";
   public static final String RESOURCE_PUSH_ICON_COLOR = "parse_push_icon_color";
@@ -164,6 +168,15 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
         mChannel = new NotificationChannel(DEFAULT_CHANNEL_ID, DEFAULT_CHANNEL_TITLE, importance);
         mChannel.enableVibration(true);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+
+        Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+          .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+          .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+          .build();
+
+        mChannel.setSound(sound, audioAttributes);
         
         notifManager.createNotificationChannel(mChannel);
       }
@@ -188,7 +201,8 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
       builder.setStyle(new NotificationCompat.BigTextStyle().bigText(pnData.optString("alert")));
     }
 
-    if (!ParsePushPlugin.isInForeground()) {
+    if (!ParsePushPlugin.isInForeground() &&
+      android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
       builder.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI);
     }
 
