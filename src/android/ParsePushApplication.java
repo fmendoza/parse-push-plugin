@@ -35,47 +35,25 @@ public class ParsePushApplication extends Application {
     super.onCreate();
 
     try {
-      // Other ways to call ParsePushReaderConfig:
-      //
-      // - Tell the reader to parse custom parameters, e.g., <preference name="CustomParam1" value="foo" />
-      //   ParsePushConfigReader config = new ParsePushConfigReader(getApplicationContext(), null, new String[] {"CustomParam1", "CustomParam2"});
-      //
-      // - If you write your own MainApplication in your app package, just import com.yourpackage.R and skip detecting R.xml.config
-      //   ParsePushConfigReader config = new ParsePushConfigReader(getApplicationContext(), R.xml.config, null);
-      //
 
       // Simple config reading for opensource parse-server:
       // 1st null to detect R.xml.config resource id, 2nd null indicates no custom config param
       //ParsePushConfigReader config = new ParsePushConfigReader(getApplicationContext(), null, null);
-      //
-      //Parse.initialize(new Parse.Configuration.Builder(this)
-      //   .applicationId(config.getAppId())
-      //   .server(config.getServerUrl()) // The trailing slash is important, e.g., https://mydomain.com:1337/parse/
-      //   .build()
-      //);
 
-      //
-      // Support parse.com and opensource parse-server
-      // 1st null to detect R.xml.config
-      ParsePushConfigReader config = new ParsePushConfigReader(getApplicationContext(), null,
-          new String[] { "ParseClientKey" });
-      if (config.getServerUrl().equalsIgnoreCase("PARSE_DOT_COM")) {
-        //
-        //initialize for use with legacy parse.com
-        //Parse.initialize(this, config.getAppId(), config.getClientKey());
-      } else {
-        Log.d(LOGTAG, "ServerUrl " + config.getServerUrl());
-        Log.d(LOGTAG, "NOTE: The trailing slash is important, e.g., https://mydomain.com:1337/parse/");
-        Log.d(LOGTAG, "NOTE: Set the clientKey if your server requires it, otherwise it can be null");
-        //
-        // initialize for use with opensource parse-server
-        Parse.initialize(new Parse.Configuration.Builder(this).applicationId(config.getAppId())
-            .server(config.getServerUrl()).clientKey(config.getClientKey()).build());
-      }
+      ParsePushConfigReader config = new ParsePushConfigReader(
+        getApplicationContext(), null, new String[] { "ParseClientKey" }
+      );
+     
+      Log.d(LOGTAG, "ServerUrl " + config.getServerUrl());
+      Log.d(LOGTAG, "NOTE: The trailing slash is important, e.g., https://mydomain.com:1337/parse/");
+        
+      Parse.initialize(new Parse.Configuration.Builder(this)
+      .applicationId(config.getAppId())
+      .server(config.getServerUrl())
+      .build());
 
       Log.d(LOGTAG, "Saving Installation in background");
-      //
-      // save installation. Parse.Push will need this to push to the correct device
+
       ParseInstallation.getCurrentInstallation().saveInBackground(new SaveCallback() {
         @Override
         public void done(ParseException ex) {

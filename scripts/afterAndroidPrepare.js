@@ -38,29 +38,6 @@ module.exports = function (context) {
       .pipe(fs.createWriteStream(path.join(iconTargetPath, parsePushNotificationIcon + '.png')));
   }
 
-  // Copy gcm sender id from config.xml into AndroidManifest
-  // detect parse.com or parse-server mode
-  var parseServerUrl = configXml.data.find('preference[@name="ParseServerUrl"]').get('value');
-
-  if (parseServerUrl.toUpperCase() !== "PARSE_DOT_COM") {
-    //opensource parse-server requires own GcmSenderId, so copy it from config.xml to AndroidManifest
-    var configXmlGcmIdNode = configXml.data.find('preference[@name="ParseGcmSenderId"]');
-    if (!configXmlGcmIdNode) {
-      console.error("ParseGcmSenderId is not set in config.xml");
-      return false;
-    }
-
-    var manifestGcmIdNode = applicationNode.find('meta-data[@android:name="com.parse.push.gcm_sender_id"]');
-
-    if (!manifestGcmIdNode) {
-      manifestGcmIdNode = new ET.Element('meta-data', { 'android:name': 'com.parse.push.gcm_sender_id' });
-      applicationNode.append(manifestGcmIdNode);
-    }
-
-    manifestGcmIdNode.set('android:value', 'id:' + configXmlGcmIdNode.get('value'));
-  }
-
-
   androidManifest.save();
 
   return true;
