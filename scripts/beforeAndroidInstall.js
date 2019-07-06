@@ -6,7 +6,7 @@
 var DefaultApplicationName = ["github.taivo.parsepushplugin", "ParsePushApplication"].join('.');
 
 module.exports = function(context) {
-   var path = context.requireCordovaModule('path');
+   var path = require('path');
    var ConfigFile = context.requireCordovaModule("cordova-common").ConfigFile;
 
    var androidPrjDir = path.join(context.opts.projectRoot, 'platforms/android/app/src/main');
