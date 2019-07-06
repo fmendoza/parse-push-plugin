@@ -1,7 +1,7 @@
 module.exports = function (context) {
   var fs = require('fs');
   var path = require('path');
-  var ET = context.requireCordovaModule('elementtree');
+  var ET = require('elementtree');
   var ConfigFile = context.requireCordovaModule("cordova-common").ConfigFile;
 
   var configXml = new ConfigFile(context.opts.projectRoot, null, './config.xml');
