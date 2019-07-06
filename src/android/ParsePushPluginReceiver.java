@@ -12,7 +12,8 @@ import android.app.NotificationChannel;
 
 import github.taivo.parsepushplugin.ParsePushConfigReader;
 
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import android.net.Uri;
 import android.util.Log;
@@ -97,8 +98,6 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
         : new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
 
     activityIntent.putExtras(intent).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-    //ParseAnalytics.trackAppOpened(intent);
 
     // allow a urlHash parameter for hash as well as query params.
     // This lets the app know what to do at coldstart by opening a PN.
