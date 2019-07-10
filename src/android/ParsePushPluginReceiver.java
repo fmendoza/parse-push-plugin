@@ -188,6 +188,14 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
 
     if (!ParsePushPlugin.isInForeground()) {
       builder.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI);
+
+      if (!pnData.has("sound")) {
+        builder.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI);
+      } else {
+        int resourceId = context.getResources().getIdentifier(pnData.optString("sound"), "raw", context.getPackageName());
+        Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resourceId);
+        builder.setSound(soundUri);
+      } 
     }
 
     if (pnData.has("badge")) {
