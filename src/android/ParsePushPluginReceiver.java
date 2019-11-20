@@ -18,14 +18,27 @@ import androidx.core.app.NotificationCompat;
 import android.net.Uri;
 import android.util.Log;
 
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.graphics.Color;
+
+import android.os.AsyncTask;
+
 import org.json.JSONObject;
 import org.json.JSONException;
 
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Random;
+import java.util.Date;
 
 import android.content.SharedPreferences;
 
@@ -47,45 +60,55 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
   @Override
   protected void onPushReceive(Context context, Intent intent) {
     if (ParsePushPlugin.isInForeground()) {
-      //
-      // relay the push notification data to the javascript
       ParsePushPlugin.jsCallback(getPushData(intent));
     } else {
-      //
-      // only create entry for notification tray if plugin/application is
-      // not running in foreground.
-      //
-      // So first we check if the user has set the configuration to have multiple
-      // notifications show in the tray (i.e. set <preference name="ParseMultiNotifications" value="true" />)
-      ParsePushConfigReader config = new ParsePushConfigReader(context, null,
-          new String[] { "ParseMultiNotifications" });
-      String parseMulti = config.get("ParseMultiNotifications");
-      if (parseMulti != null && !parseMulti.isEmpty() && parseMulti.equals("true")) {
-        // If the user wants multiple notifications in the tray, then we let ParsePushBroadcastReceiver
-        // handle it from here
-        super.onPushReceive(context, intent);
-      }
-      else {
-        // check if this is a silent notification
-        //Notification notification = getNotification(context, intent);
 
-        //if (notification != null) {
-          // use tag + notification id=0 to limit the number of notifications in the tray
-          // (older messages with the same tag and notification id will be replaced)
-          NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-          notifManager.notify(getNotificationTag(context, intent), 0, getNotification(context, intent).build());
-        //}
+      JSONObject pnData = getPushData(intent);
 
-        //
-        // A user with Android 5.0.1 reports that notif is not created in tray when
-        // app is off (not background), trying method described here
-        // https://github.com/phonegap/phonegap-plugin-push/issues/211 by @vikasing
-        // to see if it works
-        //
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        setResultCode(Activity.RESULT_OK);
+      if (pnData.has("image")) {
+
+        new AsyncTask<String, Void, Bitmap>() {
+
+          @Override
+          protected Bitmap doInBackground(final String... urls) {
+            try {
+              URL url = new URL(urls[0]);
+              HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+              connection.setDoInput(true);
+              connection.connect();
+              InputStream input = connection.getInputStream();
+              Bitmap bitmap = BitmapFactory.decodeStream(input);
+              return bitmap;
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+            return null;
+          }
+
+          @Override
+          protected void onPostExecute(final Bitmap bitmap) {
+            NotificationCompat.Builder builder = getNotification(context, intent);
+            builder.setLargeIcon(bitmap);
+            builder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null));
+            showNotification(context, builder.build());
+          }
+
+        }.execute(pnData.optString("image"));
+
+      } else {
+        NotificationCompat.Builder builder = getNotification(context, intent);
+        showNotification(context, builder.build());
       }
     }
+  }
+
+  private int generateRandomValue() {
+    return (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+  }
+
+  private void showNotification(Context context, Notification notification) {
+    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    notificationManager.notify(generateRandomValue(), notification);
   }
 
   @Override
@@ -158,15 +181,25 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
       NotificationChannel mChannel = notifManager.getNotificationChannel(DEFAULT_CHANNEL_ID);
 
       if (mChannel == null) {
+
+        Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+        .build();
   
         mChannel = new NotificationChannel(DEFAULT_CHANNEL_ID, DEFAULT_CHANNEL_TITLE, importance);
         mChannel.enableVibration(true);
+        mChannel.enableLights(true);
+        mChannel.setLightColor(Color.WHITE, 1000, 500);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        mChannel.setSound(sound, audioAttributes);
         
         notifManager.createNotificationChannel(mChannel);
       }
 
       builder = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID);
+      builder.setDefaults(Notification.DEFAULT_SOUND);
 
     } else {
       builder = new NotificationCompat.Builder(context);
@@ -183,13 +216,14 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
 
     if (pnData.has("alert")) {
       builder.setContentText(pnData.optString("alert"));
+    }
+
+    if (pnData.has("alert")) {
       builder.setStyle(new NotificationCompat.BigTextStyle().bigText(pnData.optString("alert")));
     }
 
     if (!ParsePushPlugin.isInForeground()) {
-      builder.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI);
-
-      if (!pnData.has("sound")) {
+      if (!pnData.has("sound") || (pnData.has("sound") && pnData.optString("sound") == "default")) {
         builder.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI);
       } else {
         int resourceId = context.getResources().getIdentifier(pnData.optString("sound"), "raw", context.getPackageName());
