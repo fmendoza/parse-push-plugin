@@ -191,7 +191,7 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
         mChannel = new NotificationChannel(DEFAULT_CHANNEL_ID, DEFAULT_CHANNEL_TITLE, importance);
         mChannel.enableVibration(true);
         mChannel.enableLights(true);
-        mChannel.setLightColor(Color.WHITE, 1000, 500);
+        mChannel.setLightColor(Color.WHITE);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
         mChannel.setSound(sound, audioAttributes);
         
