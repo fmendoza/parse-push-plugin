@@ -73,11 +73,11 @@ public class ParsePushPlugin extends CordovaPlugin {
       return true;
     }
     if (action.equals(ACTION_RESET_BADGE)) {
-      ParsePushPluginReceiver.resetBadge(this.cordova.getActivity().getApplicationContext());
+      this.resetBadge(callbackContext);
       return true;
     }
     if (action.equals(ACTION_SET_BADGE)) {
-      ParsePushPluginReceiver.setBadge(args.getInt(0), this.cordova.getActivity().getApplicationContext());
+      this.setBadge(args.getInt(0), callbackContext);
       return true;
     }
     if (action.equals(ACTION_REGISTER_FOR_PN)) {
@@ -85,6 +85,24 @@ public class ParsePushPlugin extends CordovaPlugin {
       return true;
     }
     return false;
+  }
+
+  private void resetBadge(final CallbackContext callbackContext) {
+    cordova.getThreadPool().execute(new Runnable() {
+      public void run() {
+        ParsePushPluginReceiver.resetBadge(cordova.getActivity().getApplicationContext());
+        callbackContext.success();
+      }
+    });
+  }
+
+  private void setBadge(int badgeCount, final CallbackContext callbackContext) {
+    cordova.getThreadPool().execute(new Runnable() {
+      public void run() {
+        ParsePushPluginReceiver.setBadge(badgeCount, cordova.getActivity().getApplicationContext());
+        callbackContext.success();
+      }
+    });
   }
 
   private void getInstallationId(final CallbackContext callbackContext) {
