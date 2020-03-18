@@ -1,101 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://www.apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="parse-push-plugin" version="1.0.8">
-   <name>ParsePushPlugin</name>
-   <description>Parse.Push plugin for phonegap/cordova/ionic framework</description>
-	<keywords>cordova,phonegap,ionic framework, parse server, parse push, push notification</keywords>
+<plugin xmlns="http://www.apache.org/cordova/ns/plugins/1.0" 
+  xmlns:android="http://schemas.android.com/apk/res/android" id="parse-push-plugin" version="1.0.8">
+  <name>ParsePushPlugin</name>
+  <description>Parse.Push plugin for phonegap/cordova/ionic framework</description>
+  <keywords>cordova,phonegap,ionic framework, parse server, parse push, push notification</keywords>
 
-   <js-module src="www/parse-push-plugin.js" name="ParsePushPlugin">
-      <clobbers target="ParsePushPlugin" />
-   </js-module>
+  <js-module src="www/parse-push-plugin.js" name="ParsePushPlugin">
+    <clobbers target="ParsePushPlugin" />
+  </js-module>
 
-   <platform name="android">
-      <config-file target="res/xml/config.xml" parent="/*">
-         <feature name="ParsePushPlugin">
-            <param name="android-package" value="github.taivo.parsepushplugin.ParsePushPlugin" />
-         </feature>
-      </config-file>
-      <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest/application">
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="ParsePushPlugin">
+        <param name="android-package" value="github.taivo.parsepushplugin.ParsePushPlugin" />
+      </feature>
+    </config-file>
+    <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest/application">
 
-        <service android:name="com.parse.fcm.ParseFirebaseMessagingService" android:stopWithTask="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+      <service android:name="com.parse.fcm.ParseFirebaseMessagingService" android:stopWithTask="false">
+        <intent-filter>
+          <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+      </service>
 
-        <receiver android:exported="false" android:name="github.taivo.parsepushplugin.ParsePushPluginReceiver">
-            <intent-filter>
-                <action android:name="com.parse.push.intent.RECEIVE" />
-                <action android:name="com.parse.push.intent.DELETE" />
-                <action android:name="com.parse.push.intent.OPEN" />
-            </intent-filter>
-        </receiver>
+      <receiver android:exported="false" android:name="github.taivo.parsepushplugin.ParsePushPluginReceiver">
+        <intent-filter>
+          <action android:name="com.parse.push.intent.RECEIVE" />
+          <action android:name="com.parse.push.intent.DELETE" />
+          <action android:name="com.parse.push.intent.OPEN" />
+        </intent-filter>
+      </receiver>
 
-      </config-file>
-      <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest">
-         <uses-permission android:name="android.permission.INTERNET" />
-         <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-         <uses-permission android:name="android.permission.VIBRATE" />
-      </config-file>
+    </config-file>
+    <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.INTERNET" />
+      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+      <uses-permission android:name="android.permission.VIBRATE" />
+    </config-file>
 
-      <framework src="com.google.firebase:firebase-core:16.0.8" />
-      <framework src="com.google.firebase:firebase-messaging:16.0.8" />
-      <framework src="com.github.parse-community.Parse-SDK-Android:parse:1.20.0" />
-      <framework src="com.github.parse-community.Parse-SDK-Android:fcm:1.20.0" />
-      <framework src="me.leolin:ShortcutBadger:1.1.17@aar" />
+    <framework src="com.google.firebase:firebase-core:16.0.8" />
+    <framework src="com.google.firebase:firebase-messaging:16.0.8" />
+    <framework src="com.github.parse-community.Parse-SDK-Android:parse:1.20.0" />
+    <framework src="com.github.parse-community.Parse-SDK-Android:fcm:1.20.0" />
+    <framework src="me.leolin:ShortcutBadger:1.1.17@aar" />
 
-      <framework src="src/android/parse-push-plugin.gradle" custom="true" type="gradleReference" />
+    <framework src="src/android/parse-push-plugin.gradle" custom="true" type="gradleReference" />
 
-      <source-file src="src/android/ParsePushPlugin.java" target-dir="src/github/taivo/parsepushplugin" />
-      <source-file src="src/android/ParsePushPluginReceiver.java" target-dir="src/github/taivo/parsepushplugin" />
-      <source-file src="src/android/ParsePushConfigReader.java" target-dir="src/github/taivo/parsepushplugin" />
-      <source-file src="src/android/ParsePushConfigException.java" target-dir="src/github/taivo/parsepushplugin" />
-      <source-file src="src/android/ParsePushApplication.java" target-dir="src/github/taivo/parsepushplugin" />
+    <source-file src="src/android/ParsePushPlugin.java" target-dir="src/github/taivo/parsepushplugin" />
+    <source-file src="src/android/ParsePushPluginReceiver.java" target-dir="src/github/taivo/parsepushplugin" />
+    <source-file src="src/android/ParsePushConfigReader.java" target-dir="src/github/taivo/parsepushplugin" />
+    <source-file src="src/android/ParsePushConfigException.java" target-dir="src/github/taivo/parsepushplugin" />
+    <source-file src="src/android/ParsePushApplication.java" target-dir="src/github/taivo/parsepushplugin" />
 
-      <!-- hook to simplify default installation -->
-      <hook type="before_plugin_install" src="scripts/beforeAndroidInstall.js" />
-      <hook type="before_plugin_uninstall" src="scripts/beforeAndroidUninstall.js" />
-      <hook type="after_prepare" src="scripts/afterAndroidPrepare.js" />
-   </platform>
+    <!-- hook to simplify default installation -->
+    <hook type="before_plugin_install" src="scripts/beforeAndroidInstall.js" />
+    <hook type="before_plugin_uninstall" src="scripts/beforeAndroidUninstall.js" />
+    <hook type="after_prepare" src="scripts/afterAndroidPrepare.js" />
+  </platform>
 
-   <platform name="ios">
-      <config-file target="config.xml" parent="/*">
-         <feature name="ParsePushPlugin">
-            <param name="ios-package" value="ParsePushPlugin" />
-            <param name="onload" value="true" />
-         </feature>
-      </config-file>
-      <config-file target="*-Debug.plist" parent="aps-environment">
-      	<string>development</string>
-      </config-file>
-      <config-file target="*-Release.plist" parent="aps-environment">
-      	<string>production</string>
-      </config-file>
-      <header-file src="src/ios/ParsePushPlugin.h" />
-      <source-file src="src/ios/ParsePushPlugin.m" />
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="ParsePushPlugin">
+        <param name="ios-package" value="ParsePushPlugin" />
+        <param name="onload" value="true" />
+      </feature>
+    </config-file>
+    <config-file target="*-Debug.plist" parent="aps-environment">
+      <string>development</string>
+    </config-file>
+    <config-file target="*-Release.plist" parent="aps-environment">
+      <string>production</string>
+    </config-file>
+    <header-file src="src/ios/ParsePushPlugin.h" />
+    <source-file src="src/ios/ParsePushPlugin.m" />
 
-      <header-file src="src/ios/AppDelegate+parsepush.h" />
-      <source-file src="src/ios/AppDelegate+parsepush.m" />
+    <header-file src="src/ios/AppDelegate+parsepush.h" />
+    <source-file src="src/ios/AppDelegate+parsepush.m" />
 
-      <framework src="AudioToolbox.framework" />
-      <framework src="CFNetwork.framework" />
-      <framework src="CoreGraphics.framework" />
-      <framework src="CoreLocation.framework" />
-      <framework src="MobileCoreServices.framework" />
-      <framework src="QuartzCore.framework" />
-      <framework src="Security.framework" />
-      <framework src="StoreKit.framework" />
-      <framework src="SystemConfiguration.framework" />
-      <framework src="libz.tbd" />
-      <framework src="libsqlite3.tbd" />
-      <framework src="src/ios/Frameworks/Parse.framework" custom="true" />
-      <framework src="src/ios/Frameworks/Bolts.framework" custom="true" />
-   </platform>
+    <framework src="AudioToolbox.framework" />
+    <framework src="CFNetwork.framework" />
+    <framework src="CoreGraphics.framework" />
+    <framework src="CoreLocation.framework" />
+    <framework src="MobileCoreServices.framework" />
+    <framework src="QuartzCore.framework" />
+    <framework src="Security.framework" />
+    <framework src="StoreKit.framework" />
+    <framework src="SystemConfiguration.framework" />
+    <framework src="libz.tbd" />
+    <framework src="libsqlite3.tbd" />
+    <framework src="src/ios/Frameworks/Parse.framework" custom="true" />
+    <framework src="src/ios/Frameworks/Bolts.framework" custom="true" />
+  </platform>
 
-   <platform name="windows">
-     <js-module src="src/windows/jsTimezoneDetect.min.js" name="jsTimezoneDetect" />
-     <js-module src="src/windows/ParsePushPluginProxy.js" name="ParsePushPluginProxy">
-       <merges target="" />
-     </js-module>
-   </platform>
+  <platform name="windows">
+    <js-module src="src/windows/jsTimezoneDetect.min.js" name="jsTimezoneDetect" />
+    <js-module src="src/windows/ParsePushPluginProxy.js" name="ParsePushPluginProxy">
+      <merges target="" />
+    </js-module>
+  </platform>
 </plugin>
