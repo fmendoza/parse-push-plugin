@@ -1,11 +1,11 @@
-var serviceName = 'ParsePushPlugin';
+cordova.define("parse-push-plugin.ParsePushPlugin", function (require, exports, module) {
+  var serviceName = 'ParsePushPlugin';
 
-//
-// establish an exec bridge so native code can call javascript
-// when a PN event occurs
-//
-require('cordova/channel').onCordovaReady.subscribe(function () {
-  
+  //
+  // establish an exec bridge so native code can call javascript
+  // when a PN event occurs
+  //
+
   var jsCallback = function (pn, pushAction) {
     if (ParsePushPlugin.DEBUG) {
       console.log("Cordova callback: " + pushAction + "|" + JSON.stringify(pn));
@@ -38,200 +38,189 @@ require('cordova/channel').onCordovaReady.subscribe(function () {
     }
   };
 
-  require('cordova/exec')(jsCallback, null, serviceName, 'registerCallback', []);
-});
+  var ParsePushPlugin = {
+    _openEvent: 'openPN',
+    _receiveEvent: 'receivePN',
+    _customEventKey: 'event', //default key for custom events associated with each PN, set this to anything you see fit
 
-var ParsePushPlugin = {
-  _openEvent: 'openPN',
-  _receiveEvent: 'receivePN',
-  _customEventKey: 'event', //default key for custom events associated with each PN, set this to anything you see fit
+    DEBUG: false,
 
-  DEBUG: false,
+    initialize: function () {
+      cordova.exec(jsCallback, null, serviceName, 'registerCallback', []);
+    },
 
-  getInstallationId: function (successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'getInstallationId', []);
-  },
+    getInstallationId: function (successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'getInstallationId', []);
+    },
 
-  getInstallationObjectId: function (successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'getInstallationObjectId', []);
-  },
+    getInstallationObjectId: function (successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'getInstallationObjectId', []);
+    },
 
-  getSubscriptions: function (successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'getSubscriptions', []);
-  },
+    getSubscriptions: function (successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'getSubscriptions', []);
+    },
 
-  subscribe: function (channel, successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'subscribe', [channel]);
-  },
+    subscribe: function (channel, successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'subscribe', [channel]);
+    },
 
-  unsubscribe: function (channel, successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'unsubscribe', [channel]);
-  },
+    unsubscribe: function (channel, successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'unsubscribe', [channel]);
+    },
 
-  resetBadge: function (successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'resetBadge', []);
-  },
+    resetBadge: function (successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'resetBadge', []);
+    },
 
-  setBadge: function (count, successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'setBadge', [count]);
-  },
+    setBadge: function (count, successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'setBadge', [count]);
+    },
 
-  register: function (successCb, errorCb) {
-    cordova.exec(successCb, errorCb, serviceName, 'register', []);
-  },
-};
+    register: function (successCb, errorCb) {
+      cordova.exec(successCb, errorCb, serviceName, 'register', []);
+    },
+  };
 
-//
-// give ParsePushPlugin event handling capability so we can use it to trigger
-// push notification onReceive events
-function poorManExtend(object, source) {
-  object || (object = {});
+  //
+  // give ParsePushPlugin event handling capability so we can use it to trigger
+  // push notification onReceive events
+  function poorManExtend(object, source) {
+    object || (object = {});
 
-  for (var prop in source) {
-    if (source.hasOwnProperty(prop)) {
-      object[prop] = source[prop];
+    for (var prop in source) {
+      if (source.hasOwnProperty(prop)) {
+        object[prop] = source[prop];
+      }
     }
+    return object;
   }
-  return object;
-}
 
-var eventSplitter = /\s+/;
-var slice = Array.prototype.slice;
-var EventMixin = {
-  _coldStartDelayMs: 1000,
-  on: function (events, callback, context) {
+  var eventSplitter = /\s+/;
+  var slice = Array.prototype.slice;
+  var EventMixin = {
+    on: function (events, callback, context) {
 
-    var calls, event, node, tail, list;
-    if (!callback) {
-      return this;
-    }
-    events = events.split(eventSplitter);
-    calls = this._callbacks || (this._callbacks = {});
+      var calls, event, node, tail, list;
+      if (!callback) {
+        return this;
+      }
+      events = events.split(eventSplitter);
+      calls = this._callbacks || (this._callbacks = {});
 
-    // Create an immutable callback list, allowing traversal during
-    // modification.  The tail is an empty object that will always be used
-    // as the next node.
-    event = events.shift();
-    while (event) {
-      list = calls[event];
-      node = list ? list.tail : {};
-      node.next = tail = {};
-      node.context = context;
-      node.callback = callback;
-      calls[event] = { tail: tail, next: list ? list.next : node };
+      // Create an immutable callback list, allowing traversal during
+      // modification.  The tail is an empty object that will always be used
+      // as the next node.
       event = events.shift();
-    }
-    return this;
-  },
-
-  /**
-   * Remove one or many callbacks. If `context` is null, removes all callbacks
-   * with that function. If `callback` is null, removes all callbacks for the
-   * event. If `events` is null, removes all bound callbacks for all events.
-   */
-  off: function (events, callback, context) {
-    var event, calls, node, tail, cb, ctx;
-
-    // No events, or removing *all* events.
-    if (!(calls = this._callbacks)) {
-      return;
-    }
-    if (!(events || callback || context)) {
-      delete this._callbacks;
-      return this;
-    }
-
-    // Loop through the listed events and contexts, splicing them out of the
-    // linked list of callbacks if appropriate.
-    events = events ? events.split(eventSplitter) : Object.keys(calls);
-    event = events.shift();
-    while (event) {
-      node = calls[event];
-      delete calls[event];
-      if (!node || !(callback || context)) {
+      while (event) {
+        list = calls[event];
+        node = list ? list.tail : {};
+        node.next = tail = {};
+        node.context = context;
+        node.callback = callback;
+        calls[event] = { tail: tail, next: list ? list.next : node };
         event = events.shift();
-        continue;
       }
-      // Create a new list, omitting the indicated callbacks.
-      tail = node.tail;
-      node = node.next;
-      while (node !== tail) {
-        cb = node.callback;
-        ctx = node.context;
-        if ((callback && cb !== callback) || (context && ctx !== context)) {
-          this.on(event, cb, ctx);
-        }
-        node = node.next;
-      }
-      event = events.shift();
-    }
-
-    return this;
-  },
-
-  /**
-   * Trigger one or many events, firing all bound callbacks. Callbacks are
-   * passed the same arguments as `trigger` is, apart from the event name
-   * (unless you're listening on `"all"`, which will cause your callback to
-   * receive the true name of the event as the first argument).
-   */
-  trigger: function (events) {
-    if (this.DEBUG) {
-      console.log("enter ParsePushPlugin.trigger: " + events);
-    }
-
-    var event, node, calls, tail, args, all, rest;
-    if (!(calls = this._callbacks)) {
       return this;
-    }
-    all = calls.all;
-    events = events.split(eventSplitter);
-    rest = slice.call(arguments, 1);
+    },
 
-    // For each event, walk through the linked list of callbacks twice,
-    // first to trigger the event, then to trigger any `"all"` callbacks.
-    event = events.shift();
-    while (event) {
-      node = calls[event];
-      if (node) {
-        tail = node.tail;
-        while ((node = node.next) !== tail) {
-          node.callback.apply(node.context || this, rest);
-        }
+    /**
+     * Remove one or many callbacks. If `context` is null, removes all callbacks
+     * with that function. If `callback` is null, removes all callbacks for the
+     * event. If `events` is null, removes all bound callbacks for all events.
+     */
+    off: function (events, callback, context) {
+      var event, calls, node, tail, cb, ctx;
+
+      // No events, or removing *all* events.
+      if (!(calls = this._callbacks)) {
+        return;
       }
-      node = all;
-      if (node) {
-        tail = node.tail;
-        args = [event].concat(rest);
-        while ((node = node.next) !== tail) {
-          node.callback.apply(node.context || this, args);
-        }
+      if (!(events || callback || context)) {
+        delete this._callbacks;
+        return this;
       }
+
+      // Loop through the listed events and contexts, splicing them out of the
+      // linked list of callbacks if appropriate.
+      events = events ? events.split(eventSplitter) : Object.keys(calls);
       event = events.shift();
-    }
+      while (event) {
+        node = calls[event];
+        delete calls[event];
+        if (!node || !(callback || context)) {
+          event = events.shift();
+          continue;
+        }
+        // Create a new list, omitting the indicated callbacks.
+        tail = node.tail;
+        node = node.next;
+        while (node !== tail) {
+          cb = node.callback;
+          ctx = node.context;
+          if ((callback && cb !== callback) || (context && ctx !== context)) {
+            this.on(event, cb, ctx);
+          }
+          node = node.next;
+        }
+        event = events.shift();
+      }
 
-    if (this.DEBUG) {
-      console.log("exit ParsePushPlugin.trigger: " + events);
-    }
-    return this;
-  },
+      return this;
+    },
 
-  softTrigger: function (events) {
-    //helps the cold-start case by allowing the main app some extra time
-    //to setup notification handlers.
-    //Note: this is a 95% solution and wouldn't work for extreme cases
-    //where the main app takes too long to setup handlers.
-    //
-    if (this._callbacks) {
+    /**
+     * Trigger one or many events, firing all bound callbacks. Callbacks are
+     * passed the same arguments as `trigger` is, apart from the event name
+     * (unless you're listening on `"all"`, which will cause your callback to
+     * receive the true name of the event as the first argument).
+     */
+    trigger: function (events) {
+      if (this.DEBUG) {
+        console.log("enter ParsePushPlugin.trigger: " + events);
+      }
+
+      var event, node, calls, tail, args, all, rest;
+      if (!(calls = this._callbacks)) {
+        return this;
+      }
+      all = calls.all;
+      events = events.split(eventSplitter);
+      rest = slice.call(arguments, 1);
+
+      // For each event, walk through the linked list of callbacks twice,
+      // first to trigger the event, then to trigger any `"all"` callbacks.
+      event = events.shift();
+      while (event) {
+        node = calls[event];
+        if (node) {
+          tail = node.tail;
+          while ((node = node.next) !== tail) {
+            node.callback.apply(node.context || this, rest);
+          }
+        }
+        node = all;
+        if (node) {
+          tail = node.tail;
+          args = [event].concat(rest);
+          while ((node = node.next) !== tail) {
+            node.callback.apply(node.context || this, args);
+          }
+        }
+        event = events.shift();
+      }
+
+      if (this.DEBUG) {
+        console.log("exit ParsePushPlugin.trigger: " + events);
+      }
+      return this;
+    },
+
+    softTrigger: function (events) {
       this.trigger.apply(this, arguments);
-    } else {
-      var self = this;
-      var triggerArgs = arguments;
-      window.setTimeout(function () {
-        self.trigger.apply(self, triggerArgs);
-      }, self._coldStartDelayMs || 200);
     }
-  }
-};
+  };
 
-module.exports = poorManExtend(ParsePushPlugin, EventMixin);
+  module.exports = poorManExtend(ParsePushPlugin, EventMixin);
+
+});
