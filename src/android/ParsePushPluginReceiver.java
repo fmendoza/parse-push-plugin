@@ -1,6 +1,7 @@
 package github.taivo.parsepushplugin;
 
 import com.parse.ParsePushBroadcastReceiver;
+import com.parse.ParseAnalytics;
 
 import android.app.Activity;
 import android.content.Context;
@@ -98,6 +99,8 @@ public class ParsePushPluginReceiver extends ParsePushBroadcastReceiver {
         : new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
 
     activityIntent.putExtras(intent).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+    ParseAnalytics.trackAppOpenedInBackground(intent);
 
     // allow a urlHash parameter for hash as well as query params.
     // This lets the app know what to do at coldstart by opening a PN.
