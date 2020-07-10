@@ -91,7 +91,14 @@
     <framework src="SystemConfiguration.framework" />
     <framework src="libz.tbd" />
     <framework src="libsqlite3.tbd" />
-    <framework src="Parse" type="podspec" spec="~> 1.18.0" />
+    <podspec>
+      <config>
+        <source url="https://cdn.cocoapods.org/" />
+      </config>
+      <pods use-frameworks="true">
+        <pod name="Parse" spec="~> 1.18.0" />
+      </pods>
+    </podspec>
   </platform>
 
   <platform name="windows">
