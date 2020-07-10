@@ -91,15 +91,7 @@
     <framework src="SystemConfiguration.framework" />
     <framework src="libz.tbd" />
     <framework src="libsqlite3.tbd" />
-    <framework src="src/ios/Frameworks/Parse.framework" custom="true" />
-    <podspec>
-      <config>
-        <source url="https://github.com/CocoaPods/Specs.git"/>
-      </config>
-      <pods use-frameworks="true">
-        <pod name="Bolts" git="https://github.com/BoltsFramework/Bolts-ObjC" branch="master" />
-      </pods>
-    </podspec>
+    <framework src="Parse" type="podspec" spec="~> 1.18.0" />
   </platform>
 
   <platform name="windows">
