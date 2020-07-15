@@ -13,6 +13,14 @@ import github.taivo.parsepushplugin.ParsePushConfigException;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.parse.fcm.ParseFCM;
+
 /*
    Why is this Application subclass needed?
       - Cordova does not define an Application class, only Activity.
@@ -61,6 +69,26 @@ public class ParsePushApplication extends Application {
             Log.e(LOGTAG, ex.toString());
           } else {
             Log.d(LOGTAG, "Installation saved");
+
+            String deviceToken = ParseInstallation.getCurrentInstallation().getString("deviceToken");
+
+            if (deviceToken == null) {
+              FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                  @Override
+                  public void onComplete(@NonNull Task<InstanceIdResult> task) {
+
+                    if (!task.isSuccessful()) {
+                      return;
+                    }
+
+                    // Get new Instance ID token
+                    String token = task.getResult().getToken();
+                    ParseFCM.register(token);
+                  }
+                });
+            }
+
           }
         }
       });
