@@ -93,7 +93,7 @@
           <source url="https://cdn.cocoapods.org/" />
         </config>
         <pods use-frameworks="true">
-          <pod name="Parse" spec="~> 1.18.0" />
+          <pod name="Parse" spec="~> 1.19.0" />
         </pods>
       </podspec>
    </platform>
